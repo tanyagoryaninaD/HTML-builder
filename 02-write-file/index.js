@@ -10,7 +10,7 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-console.log('Введите текст для добавления или "exit" для выхода');
+console.log('Enter text for add or "exit" for exit');
 
 rl.on('line', (input) => {
     if (input === 'exit') {
