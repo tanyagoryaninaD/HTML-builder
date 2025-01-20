@@ -5,6 +5,8 @@ function buildPage() {
     const mainPath = path.join(__dirname, 'project-dist');
     const templatePath = path.join(__dirname, 'template.html');
     const componentsPath = path.join(__dirname, 'components');
+    const stylesPath = path.join(__dirname, 'styles');
+    const stylePath = path.join(mainPath, 'style.css');
     const regexp = /{{[^}]+}}/g;
 
     fs.mkdir(mainPath, { recursive: true }, (err) => {
@@ -65,60 +67,57 @@ function buildPage() {
         }
 
         replaceTags()
+        function mergeStyles() {
+            fs.writeFile(stylePath, '', (err) => {
+                if (err) throw err;
+
+                function readDir(dir, copy, callback) {
+                    console.log('🚀  readDir  dir:', dir)
+                    fs.readdir(dir, {withFileTypes: true}, (err, files) => {
+                        if (err) throw err
+
+                        let index = 0
+
+                        function appendNextFile() {
+                            if (index < files.length) {
+                                const filePath = path.join(dir, files[index].name)
+                                
+                                if (files[index].isDirectory()) {
+                                    readDir(filePath, copy, () => {
+                                        index++;
+                                        appendNextFile()
+                                    })
+                                } else { 
+                                    if (path.extname(filePath) === '.css') {
+                                        fs.readFile(filePath, 'utf8', (err, data) => {
+                                            if (err) throw err;
+                                            fs.appendFile(copy, data + '\n', (err) => {
+                                                if (err) throw err;
+                                                console.log('Append file:', files[index].name)
+                                                index++
+                                                appendNextFile()
+                                            })
+                                        })
+                                    } else {
+                                        index++
+                                        appendNextFile()
+                                    }
+                                } 
+                            } else {
+                                if (callback) callback()
+                            }
+                        }
+                        appendNextFile()
+                    })
+                }
+                readDir(stylesPath, stylePath)
+            })
+        }
+        mergeStyles()
+
     });
 }
 
 buildPage();
 
 
-        //console.log('🚀  fs.mkdir  path.join', path.join(mainPath, 'style.css'))
-
-        // function mergeStyles(main, newPath) {     
-        //     fs.writeFile(newPath, '', (err) => {
-        //         console.log('🚀  fs.writeFile  newPath:', newPath)
-        //         if (err) throw err;
-
-        //         function readDir(dir, copy, callback) {
-        //             fs.readdir(dir, {withFileTypes: true}, (err, files) => {
-        //                 console.log('🚀  fs.readdir  files:', files)
-        //                 if (err) throw err
-
-        //                 let index = 0
-
-        //                 function appendNextFile() {
-        //                     if (index < files.length) {
-        //                         const filePath = path.join(dir, files[index].name)
-                                
-        //                         if (files[index].isDirectory()) {
-        //                             readDir(filePath, copy, () => {
-        //                                 index++;
-        //                                 appendNextFile()
-        //                             })
-        //                         } else { 
-        //                             if (path.extname(filePath) === '.css') {
-        //                                 fs.readFile(filePath, 'utf8', (err, data) => {
-        //                                     if (err) throw err;
-        //                                     fs.appendFile(copy, data + '\n', (err) => {
-        //                                         if (err) throw err;
-        //                                         console.log('Append file:', files[index].name)
-        //                                         index++
-        //                                         appendNextFile()
-        //                                     })
-        //                                 })
-        //                             } else {
-        //                                 index++
-        //                                 appendNextFile()
-        //                             }
-        //                         } 
-        //                     } else {
-        //                         if (callback) callback()
-        //                     }
-        //                 }
-        //                 appendNextFile()
-        //             })
-        //         }
-        //         readDir(main, newPath)
-        //     })
-        // }
-        
-        // mergeStyles(stylesPath, path.join(mainPath, 'style.css'))
