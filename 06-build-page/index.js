@@ -7,6 +7,8 @@ function buildPage() {
     const componentsPath = path.join(__dirname, 'components');
     const stylesPath = path.join(__dirname, 'styles');
     const stylePath = path.join(mainPath, 'style.css');
+    const srcDir = path.join(__dirname, 'assets');
+    const destDir = path.join(mainPath, 'assets');
     const regexp = /{{[^}]+}}/g;
 
     fs.mkdir(mainPath, { recursive: true }, (err) => {
@@ -115,9 +117,19 @@ function buildPage() {
         }
         mergeStyles()
 
+        function copyDir() {
+            fs.cp(srcDir, destDir, { recursive: true, force: true }, (err) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                } else {
+                    console.log('Copied the assets folder')
+                }
+            });
+        }
+        copyDir()
+
     });
 }
 
 buildPage();
-
-
