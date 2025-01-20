@@ -7,14 +7,17 @@ fs.readdir(dirPath, {withFileTypes: true}, (err, files) => {
     if (err) throw err;
 
     files.forEach((file) => {
-        const filePath = path.join(file.path, file.name);
-        fs.stat(filePath, (err, stats) => {
-            if (file.isFile()) {  
-                if (err) throw err;
-                const extension = path.extname(filePath)
+        if (file.isFile()) {
+            const filePath = path.join(dirPath, file.name);
+            fs.stat(filePath, (err, stats) => {
+                if (err) {
+                    console.error('Error when receiving information about the file:', err);
+                    return;
+                }
+                const extension = path.extname(file.name)
                 const name = path.basename(file.name, extension)
-                console.log(`${name} - ${extension.slice(1, extension.length)} - ${stats.size / 1000}kb`);
-            }
-        });
+                console.log(`${name} - ${extension.slice(1)} - ${stats.size}b`);
+            });
+        }
     })
 });
